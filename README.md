@@ -1,2 +1,2 @@
 # Search-Machine
-Search machine in C++
+Search machine built in C++ for Windows based systems
