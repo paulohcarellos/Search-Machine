@@ -1,76 +1,48 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "document.h"
-#include "vector.h"
+#include "collection.h"
 
 using namespace std;
 
-void createdoc(Document &doc, ifstream &input);
-
 int main() {
 
-	ifstream D1;
-	D1.open("d1.txt");
+	Collection::Document bohemian = Collection::Document("Bohemian Rhapsody", "./Songs/Bohemian Rhapsody.txt");
+	Collection::Document mockinbird = Collection::Document("Mockinbird", "./Songs/Mockinbird.txt");
+	Collection::Document sweater = Collection::Document("Sweater Weather", "./Songs/Sweater Weather.txt");
+	Collection::Document devil = Collection::Document("The Devil in I", "./Songs/The Devil in I.txt");
+	Collection::Document mountains = Collection::Document("The Misty Mountains Cold", "./Songs/The Misty Mountains Cold.txt");
+	Collection::Document heart = Collection::Document("If I Had a Heart", "./Songs/If I Had a Heart.txt");
+	Collection::Document cinema = Collection::Document("Cinema", "./Songs/Cinema.txt");
 
-	Document bohemian = Document();
+	Collection songs = Collection();
+	songs.append(bohemian);
+	songs.append(mockinbird);
+	songs.append(sweater);
+	songs.append(devil);
+	songs.append(mountains);
+	songs.append(heart);
+	songs.append(cinema);
 
-	createdoc(bohemian, D1);
+	string input;
 
-	bohemian.print();
+	while (1) {
 
-	system("pause");
-	return 0;
+		cout << " Insert word: ";
+		cin >> input;
 
-}
-
-void createdoc(Document &doc, ifstream &input) {
-
-	int k = 0;
-
-	char word[30];
-	char newword[30];
-
-	string s;
-
-	while (!(input.eof())) {
-
-		input >> word;
-
-		k = 0;
-
-		for (int i = 0; i < 20; i++) {
-
-			if (word[i] >= 65 && word[i] <= 90) {
-
-				newword[k] = word[i] + 32;
-				k++;
-
-			}
-
-			if (word[i] >= 97 && word[i] <= 122) {
-
-				newword[k] = word[i];
-				k++;
-
-			}
-
-			if (word[i] >= 48 && word[i] <= 57) {
-
-				newword[k] = word[i];
-				k++;
-
-			}
-
-			if (word[i] == '\0') {
-
-				newword[k] = '\0';
-				break;
-
-			}
-		}
-
-		s = newword;
-		doc.append(s);
+		cout << endl;
+		cout << " INPUT = " << input << endl;
+		cout << endl;
+		cout << " INVERSE TERM FREQUENCY: " << songs.itf(input);
+		cout << endl;
+		cout << " APPEARENCES: " << endl;
+		songs.print_occurrences(input);
+		cout << endl;
+		cout << " TERM FREQUENCIES: " << endl;
+		songs.print_tf(input);
+		cout << endl;
 	}
+
+	return 0;
 }
