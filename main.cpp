@@ -1,21 +1,24 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "collection.h"
+#include "document.h"
+#include "map.h"
 
 using namespace std;
 
 int main() {
 
-	Collection::Document bohemian = Collection::Document("Bohemian Rhapsody", "./Songs/Bohemian Rhapsody.txt");
-	Collection::Document mockinbird = Collection::Document("Mockinbird", "./Songs/Mockinbird.txt");
-	Collection::Document sweater = Collection::Document("Sweater Weather", "./Songs/Sweater Weather.txt");
-	Collection::Document devil = Collection::Document("The Devil in I", "./Songs/The Devil in I.txt");
-	Collection::Document mountains = Collection::Document("The Misty Mountains Cold", "./Songs/The Misty Mountains Cold.txt");
-	Collection::Document heart = Collection::Document("If I Had a Heart", "./Songs/If I Had a Heart.txt");
-	Collection::Document cinema = Collection::Document("Cinema", "./Songs/Cinema.txt");
+	Document bohemian = Document("Bohemian Rhapsody", "./Songs/Bohemian Rhapsody.txt");
+	Document mockinbird = Document("Mockinbird", "./Songs/Mockinbird.txt");
+	Document sweater = Document("Sweater Weather", "./Songs/Sweater Weather.txt");
+	Document devil = Document("The Devil in I", "./Songs/The Devil in I.txt");
+	Document mountains = Document("The Misty Mountains Cold", "./Songs/The Misty Mountains Cold.txt");
+	Document heart = Document("If I Had a Heart", "./Songs/If I Had a Heart.txt");
+	Document cinema = Document("Cinema", "./Songs/Cinema.txt");
 
-	Collection songs = Collection();
+	string input;
+
+	Map songs = Map();
 	songs.append(bohemian);
 	songs.append(mockinbird);
 	songs.append(sweater);
@@ -23,26 +26,6 @@ int main() {
 	songs.append(mountains);
 	songs.append(heart);
 	songs.append(cinema);
-
-	string input;
-
-	while (1) {
-
-		cout << " Insert word: ";
-		cin >> input;
-
-		cout << endl;
-		cout << " INPUT = " << input << endl;
-		cout << endl;
-		cout << " INVERSE TERM FREQUENCY: " << songs.itf(input);
-		cout << endl;
-		cout << " APPEARENCES: " << endl;
-		songs.print_occurrences(input);
-		cout << endl;
-		cout << " TERM FREQUENCIES: " << endl;
-		songs.print_tf(input);
-		cout << endl;
-	}
 
 	return 0;
 }
