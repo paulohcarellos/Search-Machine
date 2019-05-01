@@ -4,7 +4,7 @@ using namespace std;
 
 Collection::Document::Document() {
 
-	size_ = 0;
+	doc_size_ = 0;
 	words_ = new string;
 
 	words_[0] = "404";
@@ -12,11 +12,11 @@ Collection::Document::Document() {
 
 Collection::Document::Document(const Document& copy) {
 
-	size_ = copy.size_;
+	doc_size_ = copy.doc_size_;
 
-	words_ = new string[size_];
+	words_ = new string[doc_size_];
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < doc_size_; i++) {
 
 		words_[i] = copy.words_[i];
 	}
@@ -24,7 +24,7 @@ Collection::Document::Document(const Document& copy) {
 
 Collection::Document::Document(string name, string filename) {
 
-	size_ = 0;
+	doc_size_ = 0;
 	name_ = name;
 	words_ = new string;
 
@@ -44,18 +44,18 @@ Collection::Document::Document(string name, string filename) {
 		while (!doc.eof()) {
 
 			doc >> buffer;
-			size_++;
+			doc_size_++;
 		}
 
 		doc.close();
 		doc.open(filename);
 
 		string word;
-		words_ = new string[size_];
+		words_ = new string[doc_size_];
 
 		int k = 0;
 
-		for (int i = 0; i < size_; i++) {
+		for (int i = 0; i < doc_size_; i++) {
 
 			doc >> buffer;
 
@@ -98,19 +98,24 @@ Collection::Document::Document(string name, string filename) {
 	}
 }
 
-int Collection::Document::size() {
+int Collection::Document::doc_size() const {
 
-	return size_;
+	return doc_size_;
 }
 
-string Collection::Document::name() {
+string Collection::Document::name() const {
 
 	return name_;
 }
 
+string Collection::Document::word(int i) const {
+
+	return words_[i];
+}
+
 bool Collection::Document::appear(string word) {
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < doc_size_; i++) {
 
 		if (words_[i] == word) {
 
@@ -121,11 +126,11 @@ bool Collection::Document::appear(string word) {
 	return false;
 }
 
-int Collection::Document::appearences(string word) {
+int Collection::Document::appearences(string word) const {
 
 	int occurrences = 0;
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < doc_size_; i++) {
 
 		if (words_[i] == word) {
 
@@ -136,14 +141,14 @@ int Collection::Document::appearences(string word) {
 	return occurrences;
 }
 
-double Collection::Document::tf(string word) {
+double Collection::Document::tf(string word) const {
 
-	return (double(this->appearences(word)) / double(size_));
+	return (double(this->appearences(word)) / double(doc_size_));
 }
 
 void Collection::Document::print() {
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < doc_size_; i++) {
 
 		cout << words_[i] << endl;
 
@@ -152,27 +157,37 @@ void Collection::Document::print() {
 
 Collection::Collection() {
 
-	size_ = 0;
+	c_size_ = 0;
 	docs_ = new Document;
 }
 
 Collection::Collection(const Collection& x) {
 
-	size_ = x.size_;
+	c_size_ = x.c_size_;
 
-	docs_ = new Document[size_];
+	docs_ = new Document[c_size_];
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < c_size_; i++) {
 
 		docs_[i] = x.docs_[i];
 	}
 }
 
-double Collection::itf(string word) {
+int Collection::size() const {
+
+	return c_size_;
+}
+
+Collection::Document Collection::doc(int i) const {
+
+	return docs_[i];
+}
+
+double Collection::idf(string word) const{
 
 	int n = 0;
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < c_size_; i++) {
 		if (docs_[i].appear(word)) {
 			n++;
 		}
@@ -180,7 +195,7 @@ double Collection::itf(string word) {
 
 	if (n > 0) {
 
-		return log10(double(size_) / double(n));
+		return log10(double(c_size_) / double(n));
 	}
 
 	else {
@@ -193,13 +208,13 @@ void Collection::append(const Document& doc) {
 
 	Collection copy = Collection(*this);
 
-	size_++;
+	c_size_++;
 
-	docs_ = new Document[size_];
+	docs_ = new Document[c_size_];
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < c_size_; i++) {
 
-		if (i != size_ - 1) {
+		if (i != c_size_ - 1) {
 
 			docs_[i] = copy.docs_[i];
 		}
@@ -213,7 +228,7 @@ void Collection::append(const Document& doc) {
 
 void Collection::print_occurrences(string word) {
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < c_size_; i++) {
 
 		cout << "  " << docs_[i].name() << ": " << docs_[i].appearences(word) << endl;
 	}
@@ -221,7 +236,7 @@ void Collection::print_occurrences(string word) {
 
 void Collection::print_tf(string word) {
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < c_size_; i++) {
 
 		cout << "  " << docs_[i].name() << ": " << docs_[i].tf(word) << endl;
 	}

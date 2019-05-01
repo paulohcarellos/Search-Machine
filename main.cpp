@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "collection.h"
+#include "map.h"
 
 using namespace std;
 
@@ -26,7 +27,7 @@ int main() {
 
 	string input;
 
-	while (1) {
+	while (input != "0") {
 
 		cout << " Insert word: ";
 		cin >> input;
@@ -34,7 +35,7 @@ int main() {
 		cout << endl;
 		cout << " INPUT = " << input << endl;
 		cout << endl;
-		cout << " INVERSE TERM FREQUENCY: " << songs.itf(input);
+		cout << " INVERSE TERM FREQUENCY: " << songs.idf(input);
 		cout << endl;
 		cout << " APPEARENCES: " << endl;
 		songs.print_occurrences(input);
@@ -43,6 +44,8 @@ int main() {
 		songs.print_tf(input);
 		cout << endl;
 	}
+
+	Map map = Map(songs);
 
 	return 0;
 }
