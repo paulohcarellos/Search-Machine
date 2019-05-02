@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "collection.h"
+#include "map.h"
 
 using namespace std;
 
@@ -24,25 +25,12 @@ int main() {
 	songs.append(heart);
 	songs.append(cinema);
 
+	Map map = Map(songs);
+
 	string input;
+	getline(cin, input);
 
-	while (1) {
-
-		cout << " Insert word: ";
-		cin >> input;
-
-		cout << endl;
-		cout << " INPUT = " << input << endl;
-		cout << endl;
-		cout << " INVERSE TERM FREQUENCY: " << songs.itf(input);
-		cout << endl;
-		cout << " APPEARENCES: " << endl;
-		songs.print_occurrences(input);
-		cout << endl;
-		cout << " TERM FREQUENCIES: " << endl;
-		songs.print_tf(input);
-		cout << endl;
-	}
+	cout << map.perfect_hash(input) << endl;
 
 	return 0;
 }
