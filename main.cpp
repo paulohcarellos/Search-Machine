@@ -30,6 +30,8 @@ int main() {
 	string input;
 	getline(cin, input);
 
+	Collection::Document test = Collection::Document(input);
+
 	cout << map.perfect_hash(input) << endl;
 
 	return 0;

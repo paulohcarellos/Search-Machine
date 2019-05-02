@@ -80,14 +80,14 @@ string Map::perfect_hash(const string& s) {
 	double* vsearch = new double[vsize_];
 
 	for (int i = 0; i < vsize_; i++) {
-		if (s == words_[i]) {
-
-			vsearch[i] = search.tf(s) * idf_[i];
-		}
-
-		else {
-
+		for (int j = 0; j < search.doc_size(); j++) {
+			
 			vsearch[i] = 0;
+			
+			if (search.word(j) == words_[i]) {
+
+				vsearch[i] = search.tf(search.word(j)) * idf_[i];
+			}
 		}
 	}
 
@@ -100,6 +100,11 @@ string Map::perfect_hash(const string& s) {
 	int biggest = 0;
 
 	for (int i = 0; i < size_; i++) {
+
+		sum1 = 0;
+		sum2 = 0;
+		sum3 = 0;
+
 		for (int j = 0; j < vsize_; j++) {
 			sum1 += values_[i][j] * vsearch[j];
 			sum2 += pow(values_[i][j], 2);
