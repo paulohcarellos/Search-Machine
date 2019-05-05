@@ -1,37 +1,37 @@
 #pragma once
-#include "document.h"
+
+#include "collection.h";
+#include <string>
 
 using namespace std;
 
 class Map {
 public:
 
-	//Creates an empty map
+	//Cria um dicionario vazio
 	Map();
 
-	//Appends a document to the map
-	void append(Document* x);
+	//Cria um dicionario contendo o conjunto x
+	Map(const Collection& x);
 
-	//Initializes the map for searchs
-	void init();
+	//Retorna o tamanho do dicionario
+	int size() const;
+	
+	string perfect_hash(const string& s);
 
-	//Return the name of the search's best match
-	//MAP MUST BE INITIALIZED FIRST!
-	string perfect_hash(string search);
+	void print_words();
+	void print_doc(int i);
+	void print_vector();
 
-	//Destrucs maps
 	~Map();
 
 private:
 
-	int ndocs;
-	Document** docpointers;
+	Collection::Document* doc_;
+	string* words_;
 
-	//Variables only initialized after the append of all the documents
-	int mapsize;
-	string* mapwords;
-	double* idf;
-	double** invindex;
-	double** vectors;
+	int size_;
+	int vsize_;
+	double* idf_;
+	double** values_;
 };
-
