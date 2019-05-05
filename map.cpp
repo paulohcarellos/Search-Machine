@@ -1,48 +1,65 @@
 #include "map.h"
-#include "collection.h"
-
-#include <string>
+#include "document.h"
 
 using namespace std;
 
 Map::Map() {
 
-	doc_ = new Collection::Document;
-	values_ = new double*;
+	ndocs = 0;
+	mapsize = 0;
 
-	size_ = 0;
+	mapwords = nullptr;
+	docpointers = nullptr;
+	idf = nullptr;
+	invindex = nullptr;
+	vectors = nullptr;
 }
 
-
-Map::Map(const Collection& x) {
-
-	size_ = x.size();
-
-	doc_ = new Collection::Document[size_];
-
-	for (int i = 0; i < size_; i++) {
+void Map::append(Document* x) {
+	
+	if (ndocs == 0) {
 		
-		doc_[i] = Collection::Document(x.doc(i));
+		docpointers = new Document*;	
 	}
 
-	words_ = new string[2048];
-	words_[0] = doc_[0].word(0);
+	else {
 
-	idf_ = new double[2048];
+		Document** copy = new Document*[ndocs];
 
-	string aux;
-	vsize_ = 1;
+		for (int i = 0; i < ndocs; i++) {
+
+			copy[i] = docpointers[i];
+		}
+
+		docpointers = new Document*[ndocs + 1];
+
+		for (int i = 0; i < ndocs; i++) {
+
+			docpointers[i] = copy[i];
+		}
+	}
+
+	docpointers[ndocs] = x;
+	ndocs++;
+}
+
+void Map::init() {
+	
+	string* words = new string[2048];
+	words[0] = docpointers[0]->word(0);
+
+	int aux = 1;
+	int max = 2048;
+
 	bool belong;
 
-	for (int i = 0; i < size_; i++) {
-		for (int j = 0; j < doc_[i].doc_size(); j++) {
+	for (int i = 0; i < ndocs; i++) {
+		for (int j = 0; j < docpointers[i]->size(); j++) {
+			for (int k = 0; k < aux; k++) {
 
-			belong = false;
-			aux = doc_[i].word(j);
+				belong = false;
 
-			for (int k = 0; k < vsize_; k++) {
-				
-				if (aux == words_[k]) {
+				if (docpointers[i]->word(j) == words[k]) {
 
 					belong = true;
 					break;
@@ -51,110 +68,103 @@ Map::Map(const Collection& x) {
 
 			if (!belong) {
 
-				words_[vsize_] = aux;
-				idf_[vsize_] = x.idf(aux);
-				vsize_++;
+				if (aux == max) {
+
+					string* copy = new string[max];
+
+					for (int l = 0; l < max; l++) {
+
+						copy[l] = words[l];
+					}
+
+					words = new string[max * 2];
+
+					for (int l = 0; l < max; l++) {
+
+						words[l] = copy[l];
+					}
+				}
+
+				words[aux] = docpointers[i]->word(j);
+				aux++;
 			}
 		}
 	}
 
-	values_ = new double* [size_];
+	mapsize = aux;
 
-	for (int i = 0; i < size_; i++) {
+	mapwords = new string[mapsize];
+	idf = new double[mapsize];
+	invindex = new double* [mapsize];
+	vectors = new double* [mapsize];
 
-		values_[i] = new double[vsize_];
+	for (int i = 0; i < mapsize; i++) {
+
+		mapwords[i] = words[i];
+
+		aux = 0;
+
+		invindex[i] = new double[ndocs];
+		vectors[i] = new double[ndocs];
+
+		for (int j = 0; j < ndocs; j++) {
+
+			invindex[i][j] = docpointers[j]->tf(words[i]);
+
+			if (invindex[i][j] > 0) { aux++; }
+		}
+
+		idf[i] = log10(double(ndocs) / double(aux));
 	}
 
-	for (int i = 0; i < size_; i++) {
-		for (int j = 0; j < vsize_; j++) {
+	delete[] words;
 
-			values_[i][j] = doc_[i].tf(words_[j]) * idf_[j];
+	for (int i = 0; i < mapsize; i++) {
+		for (int j = 0; j < ndocs; j++) {
+			
+			vectors[i][j] = invindex[i][j] * idf[i];
 		}
 	}
 }
 
-string Map::perfect_hash(const string& s) {
+string Map::perfect_hash(string search) {
 
-	Collection::Document search = Collection::Document(s);
-
-	double* vsearch = new double[vsize_];
-
-	for (int i = 0; i < vsize_; i++) {
-		for (int j = 0; j < search.doc_size(); j++) {
-			
-			vsearch[i] = 0;
-			
-			if (search.word(j) == words_[i]) {
-
-				vsearch[i] = search.tf(search.word(j)) * idf_[i];
-			}
-		}
-	}
-
-	double* similarity = new double[size_];
-
-	double sum1 = 0;
-	double sum2 = 0;
-	double sum3 = 0;
+	Document src = Document(search);
 
 	int biggest = 0;
+	double sum1, sum2, sum3;
+	double* vsearch = new double[mapsize];
+	double* similarity = new double[ndocs];	
 
-	for (int i = 0; i < size_; i++) {
+	for (int i = 0; i < mapsize; i++) {
+
+		vsearch[i] = double(src.tf(mapwords[i])) * idf[i];
+	}
+
+	for (int i = 0; i < ndocs; i++) {
 
 		sum1 = 0;
 		sum2 = 0;
 		sum3 = 0;
 
-		for (int j = 0; j < vsize_; j++) {
-			sum1 += values_[i][j] * vsearch[j];
-			sum2 += pow(values_[i][j], 2);
-			sum3 += pow(vsearch[j], 2);
+		for (int j = 0; j < mapsize; j++) {
 
+			sum1 += vectors[j][i] * vsearch[j];
+			sum2 += vectors[j][i] * vectors[j][i];
+			sum3 += vsearch[j] * vsearch[j];
 		}
 
 		similarity[i] = sum1 / (sqrt(sum2) * sqrt(sum3));
 
-		if (similarity[i] > similarity[biggest]) {
+		if (similarity[i] >= similarity[biggest]) {
 
 			biggest = i;
 		}
 	}
 
-	return doc_[biggest].name();
+	return docpointers[biggest]->name();
 }
 
-int Map::size() const {
+Map::~Map() {
 
-	return size_;
-}
-
-void Map::print_words() {
-
-	for (int i = 0; i < 1024; i++) {
-
-		cout << words_[i] << endl;
-	}
-}
-
-void Map::print_doc(int i) {
-
-	doc_[i].print();
-}
-
-void Map::print_vector() {
-
-	int i = 0;
-
-	for (int j = 0; j < vsize_; j++) {
-		cout << words_[i] << " ";
-		for (int k = 0; k < size_; k++) {
-			cout << values_[k][j] << " ";
-		}
-		cout << endl;
-		i++;
-	}
-}
-
-Map::~Map()
-{
 }
