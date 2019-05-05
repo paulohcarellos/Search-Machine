@@ -6,10 +6,12 @@
 
 using namespace std;
 
+void print_hash(Document** ranking);
+
 int main() {
 
 	Document bohemian = Document("Bohemian Rhapsody", "./Songs/Bohemian Rhapsody.txt");
-	Document mockinbird = Document("Mockinbird", "./Songs/Mockinbird.txt");
+	Document mockingbird = Document("Mockingbird", "./Songs/Mockinbird.txt");
 	Document sweater = Document("Sweater Weather", "./Songs/Sweater Weather.txt");
 	Document devil = Document("The Devil in I", "./Songs/The Devil in I.txt");
 	Document mountains = Document("The Misty Mountains Cold", "./Songs/The Misty Mountains Cold.txt");
@@ -19,7 +21,7 @@ int main() {
 	Map songs = Map();
 
 	songs.append(&bohemian);
-	songs.append(&mockinbird);
+	songs.append(&mockingbird);
 	songs.append(&sweater);
 	songs.append(&devil);
 	songs.append(&mountains);
@@ -29,14 +31,45 @@ int main() {
 	songs.init();
 
 	string search;
+	Document** ranking;
 
 	while (search != " ") {
 
-		cout << " Search: ";
+		cout << "\n Search: ";
 		getline(cin, search);
-		cout << "\n  Result: " << songs.perfect_hash(search) << endl;
-		cout << endl;
+		ranking = songs.perfect_hash(search);
+		print_hash(ranking);
+		cout << "\n ";
+		system("pause");
+		system("CLS");
 	}
 
 	return 0;
+}
+
+void print_hash(Document** ranking) {
+
+	cout << "\n  Results:\n" << endl;
+
+	for (int i = 0; i < 5; i++) {
+
+		if (i == 0 && ranking[i] == nullptr) {
+
+			cout << "   Your search did not match any documents" << endl;
+			break;
+		}
+
+		else {
+
+			if (ranking[i] == nullptr) {
+
+				cout << "   " << i + 1 << " -    ---"  << endl;
+			}
+
+			else {
+
+				cout << "   " << i + 1 << " - " << ranking[i]->name() << endl;
+			}
+		}	
+	}
 }

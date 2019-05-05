@@ -15,9 +15,12 @@ public:
 	//Initializes the map for searchs
 	void init();
 
+	//Returns docspointers[i]
+	Document* docptr(int i);
+
 	//Return the name of the search's best match
 	//MAP MUST BE INITIALIZED FIRST!
-	string perfect_hash(string search);
+	Document** perfect_hash(string search) const;
 
 	//Destrucs maps
 	~Map();
@@ -34,4 +37,3 @@ private:
 	double** invindex;
 	double** vectors;
 };
-

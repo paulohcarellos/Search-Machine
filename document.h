@@ -44,4 +44,3 @@ private:
 	string docname;
 	string* docwords;
 };
-

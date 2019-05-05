@@ -127,14 +127,30 @@ void Map::init() {
 	}
 }
 
-string Map::perfect_hash(string search) {
+Document* Map::docptr(int i) {
+
+	if (i < ndocs) {
+
+		return docpointers[i];
+	}
+
+	else {
+
+		return nullptr;
+	}
+}
+
+Document** Map::perfect_hash(string search) const {
 
 	Document src = Document(search);
+	Document** ranking = new Document*[5];
 
-	int biggest = 0;
+	int biggest;
 	double sum1, sum2, sum3;
 	double* vsearch = new double[mapsize];
 	double* similarity = new double[ndocs];	
+
+	bool nomatch = true;
 
 	for (int i = 0; i < mapsize; i++) {
 
@@ -156,15 +172,49 @@ string Map::perfect_hash(string search) {
 
 		similarity[i] = sum1 / (sqrt(sum2) * sqrt(sum3));
 
-		if (similarity[i] >= similarity[biggest]) {
+		if (sum1 != 0) {
 
-			biggest = i;
+			nomatch = false;
 		}
 	}
 
-	return docpointers[biggest]->name();
+	for (int i = 0; i < 5; i++) {
+
+		biggest = 0;
+
+		for (int j = 0; j < ndocs; j++) {
+
+			if (similarity[j] > similarity[biggest]) {
+
+				biggest = j;
+			}
+		}
+
+		if (similarity[biggest] != 0 && !nomatch) {
+
+			ranking[i] = docpointers[biggest];
+		}
+
+		else {
+
+			ranking[i] = nullptr;
+		}
+
+		similarity[biggest] = 0;
+	}
+
+	return ranking;
 }
 
 Map::~Map() {
 
+	delete[] docpointers;
+	delete[] mapwords;
+	delete[] idf;
+
+	for (int i = 0; i < mapsize; i++) {
+
+		delete[] invindex[i];
+		delete[] vectors[i];
+	}
 }
