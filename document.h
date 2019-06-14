@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -27,10 +28,10 @@ public:
 	string word(int i) const;
 
 	//Ruturns if word belongs to the document
-	bool belong(const string& word) const;
+	bool belong(string& word);
 
 	//Returns the "term frequency" of the word
-	int tf(const string& word) const;
+	int tf(string& word);
 
 	//Standardizes the string
 	string format(const string& str);
@@ -42,5 +43,5 @@ private:
 
 	int docsize;
 	string docname;
-	string* docwords;
+	vector<string> docwords;
 };

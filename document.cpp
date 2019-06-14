@@ -6,41 +6,27 @@ Document::Document() {
 
 	docsize = 0;
 	docname = "";
-	docwords = nullptr;
 }
 
 Document::Document(const string str) {
 
 	docsize = 0;
 	docname = "SEARCH";
-	docwords = nullptr;
+	
+	int i = 0;
+	string buffer;
 
-	for (unsigned int i = 0; i < str.size(); i++) {
+	while (i < str.size()) {
+		
+		buffer += str[i];
 
-		if (str[i + 1] == ' ' || str[i + 1] == '\0') {
+		if (str[i] == ' ' || i == str.size()-1) {
 
+			docwords.push_back(this->format(buffer));
+			buffer.clear();
 			docsize++;
 		}
-	}
-
-	if (docsize > 0) {
-		
-		int k = 0;
-
-		string buffer;
-		docwords = new string[docsize];
-
-		for (int i = 0; i < str.size(); i++) {
-
-			buffer += str[i];
-
-			if (str[i + 1] == ' ' || str[i + 1] == '\0') {
-
-				docwords[k] = this->format(buffer);
-				buffer.clear();
-				k++;
-			}
-		}
+		i++;
 	}
 }
 
@@ -54,7 +40,6 @@ Document::Document(string name, const string filename) {
 
 	if (!input) {
 
-		docwords = nullptr;
 		cout << "ERROR READING: " << name << endl;
 	}
 
@@ -65,17 +50,12 @@ Document::Document(string name, const string filename) {
 		while (!input.eof()) {
 
 			input >> buffer;
-			docsize++;
-		}
 
-		input.seekg(ios::beg);
+			if (buffer.find("@") == string::npos) {
 
-		docwords = new string[docsize];
-
-		for (int i = 0; i < docsize; i++) {
-			
-			input >> buffer;
-			docwords[i] = this->format(buffer);
+				docwords.push_back(this->format(buffer));
+				docsize++;
+			}
 		}
 	}
 }
@@ -95,25 +75,20 @@ string Document::word(int i) const {
 	return docwords[i];
 }
 
-bool Document::belong(const string& word) const {
+bool Document::belong(string& word) {
 
-	for (int i = 0; i < docsize; i++) {
-
-		if (word == docwords[i]) {
-
+	for (int i = 0; i < docsize; i++)
+		if (word == docwords[i])
 			return true;
-		}
-	}
 
 	return false;
 }
 
-int Document::tf(const string& word) const {
+int Document::tf (string& word) {
 
 	int frequency = 0;
 
 	for (int i = 0; i < docsize; i++) {
-
 		if (word == docwords[i]) {
 
 			frequency++;
@@ -149,5 +124,5 @@ string Document::format(const string& str) {
 
 Document::~Document() {
 
-	delete [] docwords;
+	docwords.clear();
 }

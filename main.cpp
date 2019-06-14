@@ -1,15 +1,23 @@
 #include <iostream>
-#include <fstream>
 #include <string>
+#include <vector>
+#include <filesystem>
+#include <time.h>
 #include "document.h"
 #include "map.h"
 
 using namespace std;
+namespace fs = filesystem;
 
-void print_hash(Document** ranking);
+void printhash(vector<string> ranking);
+void openfiles(string folder, vector<string> &filenames);
+void createdocs(vector<string>& filenames, vector<Document>& docs);
+void appenddocs(vector<Document>& docs, Map& map);
 
 int main() {
 
+
+	/*Map songs;
 	Document bohemian = Document("Bohemian Rhapsody", "./Songs/Bohemian Rhapsody.txt");
 	Document mockingbird = Document("Mockingbird", "./Songs/Mockinbird.txt");
 	Document sweater = Document("Sweater Weather", "./Songs/Sweater Weather.txt");
@@ -18,27 +26,40 @@ int main() {
 	Document heart = Document("If I Had a Heart", "./Songs/If I Had a Heart.txt");
 	Document cinema = Document("Cinema", "./Songs/Cinema.txt");
 
-	Map songs = Map();
+	songs.append(bohemian);
+	songs.append(mockingbird);
+	songs.append(sweater);
+	songs.append(devil);
+	songs.append(mountains);
+	songs.append(heart);
+	songs.append(cinema);
 
-	songs.append(&bohemian);
-	songs.append(&mockingbird);
-	songs.append(&sweater);
-	songs.append(&devil);
-	songs.append(&mountains);
-	songs.append(&heart);
-	songs.append(&cinema);
+	songs.init();*/
+	
+	time_t start;
+	time_t append;
+	time_t init;
+	time(&start);
 
-	songs.init();
+	Map map;
 
 	string search;
-	Document** ranking;
+	vector<string> ranking;
+	vector<string> filenames;
+	vector<Document> docs;
+
+	openfiles("./Tests", filenames);
+	createdocs(filenames, docs);
+	appenddocs(docs, map);
+
+	map.init();
 
 	while (search != " ") {
 
 		cout << "\n Search: ";
 		getline(cin, search);
-		ranking = songs.perfect_hash(search);
-		print_hash(ranking);
+		ranking = map.perfect_hash(search);
+		printhash(ranking);
 		cout << "\n ";
 		system("pause");
 		system("CLS");
@@ -47,29 +68,44 @@ int main() {
 	return 0;
 }
 
-void print_hash(Document** ranking) {
+void printhash(vector<string> ranking) {
 
-	cout << "\n  Results:\n" << endl;
+	int i = 0;
 
-	for (int i = 0; i < 5; i++) {
+	for (string j : ranking) {
 
-		if (i == 0 && ranking[i] == nullptr) {
+		cout << " " << ++i << " - " << j << endl;
+	}
+}
 
-			cout << "   Your search did not match any documents" << endl;
-			break;
-		}
+void openfiles(string folder, vector<string> &filenames) {
 
-		else {
+	int size = 0;
 
-			if (ranking[i] == nullptr) {
+	for (auto& file : fs::directory_iterator(folder))
+		size++;
 
-				cout << "   " << i + 1 << " -    ---"  << endl;
-			}
+	filenames.reserve(size);
 
-			else {
+	for (auto& file : fs::directory_iterator(folder))
+		filenames.push_back(file.path().string());
 
-				cout << "   " << i + 1 << " - " << ranking[i]->name() << endl;
-			}
-		}	
+}
+
+void createdocs(vector<string>& filenames, vector<Document>& docs) {
+
+	int size = filenames.size();
+	docs.reserve(filenames.size());
+
+	for (int i=0; i<size; i++)
+		docs.emplace_back(Document(filenames[i], filenames[i]));
+}
+
+void appenddocs(vector<Document>& docs, Map& map) {
+
+	for (int i = 0; i < docs.size(); i++) {
+
+		map.append(docs[i]);
+		docs[i].~Document();
 	}
 }
